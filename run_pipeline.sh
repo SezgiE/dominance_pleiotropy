@@ -32,9 +32,9 @@ if ! conda info --envs | grep -q 'main-py3'; then
 
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
-        conda create -n main-py3 "$PKGS_M" --platform=osx-64 -y
+        conda create -n main-py3 $PKGS_M --platform=osx-64 -y
     else
-        conda create -n main-py3 "$PKGS_M" -y
+        conda create -n main-py3 $PKGS_M -y
     fi
 
 fi
@@ -50,9 +50,9 @@ if ! conda info --envs | grep -q 'ld_score-py3'; then
 
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
-        conda create -n ld_score-py3 "$PKGS_LD" --platform=osx-64 -y
+        conda create -n ld_score-py3 $PKGS_LD --platform=osx-64 -y
     else
-        conda create -n ld_score-py3 "$PKGS_LD" -y
+        conda create -n ld_score-py3 $PKGS_LD -y
     fi
 
 fi
