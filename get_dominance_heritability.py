@@ -29,9 +29,13 @@ def run_dldsc_pipeline(sumstats_dir, out_dir, ldscore_path, dldsc_script):
 
         out_prefix = os.path.join(out_dir, f"{phenotype}_dom_h2")
 
-        # Construct the pure d-LDSC command
+        # Get the path to your home directory dynamically
+        home_dir = os.path.expanduser("~")
+        python_exec = os.path.join(home_dir, ".conda/envs/d-ldsc-legacy/bin/python")
+
+        # Construct the command using the direct path to the Python 2.7 executable
         dldsc_cmd = f"""
-        conda run -n d-ldsc-legacy python {dldsc_script} \\
+        {python_exec} {dldsc_script} \\
             --additive \\
             --dominance \\
             --ref-ld-chr {ldscore_path} \\
