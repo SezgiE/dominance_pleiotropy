@@ -1,8 +1,6 @@
 #!/bin/bash
 # Force this specific script to use the right Python and Conda
-unset PYTHONPATH
-unset PYTHONHOME
-source /sw/arch/RHEL9/EB_production/2025/software/Miniconda3/25.5.1-1/etc/profile.d/conda.sh
+
 
 # Exit immediately if any command exits with a non-zero status
 set -e
