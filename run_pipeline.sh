@@ -13,8 +13,10 @@ echo ""
 
 # 1. Clone the repository if it doesn't exist
 if [ ! -d "d-ldsc" ]; then
-    echo "0. d-ldsc repository not found. Cloning..."
+    echo "d-ldsc repository not found. Cloning..."
     git clone https://github.com/astheeggeggs/d-ldsc.git
+else 
+    echo "d-ldsc repository already exists. Skipping clone."
 fi
 
 # 2. Setup the MAIN environment (Python 3.8 for your data processing)
@@ -124,7 +126,7 @@ echo ""
 # ---------------------------------------------------------
 echo "4. Compiling .h2 files into a single CSV..."
 
-$PYTHON_MAIN compile_results.py
+$PYTHON_MAIN compile_h2_results.py
 
 echo "========================================================"
 echo " PIPELINE COMPLETE! Your final results are ready. "
