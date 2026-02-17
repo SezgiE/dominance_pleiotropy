@@ -22,58 +22,65 @@ else
     echo "d-ldsc repository already exists. Skipping clone."
 fi
 
+
 # 2. Setup the MAIN environment (Python 3.8 for your data processing)
 if ! conda info --envs | grep -q 'main-py3'; then
     echo " -> Creating MAIN environment (Python 3.8)..."
 
+    # Required packages for your main data processing scripts
+    PKGS_M="python=3.8 pandas numpy openpyxl xlrd=1.2.0"
+
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
-        conda create -n main-py3 python=3.8 --platform=osx-64 -y
+        conda create -n main-py3 "$PKGS_M" --platform=osx-64 -y
     else
-        conda create -n main-py3 python=3.8 -y
+        conda create -n main-py3 "$PKGS_M" -y
     fi
-    conda activate main-py3
-    pip install "pandas" "numpy" "openpyxl" "xlrd==1.2.0"
-    conda deactivate main-py3
+
 fi
+
 
 # 3. Setup the environment for LD_score calculation (Python 3.8 with downgraded libaries for get_ldscores.py)
 if ! conda info --envs | grep -q 'ld_score-py3'; then
     echo " -> Creating environment for LD Score calculation (Python 3.8 with downgraded libaries)..."
 
+    # Required packages with specific versions for get_ldscores.py
+    PKGS_LD="python=3.8 pandas<1.0.0 numpy<1.20 bitarray==2.6.0 
+    scipy nose pybedtools openpyxl xlrd==1.2.0"
+
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
-        conda create -n ld_score-py3 python=3.8 --platform=osx-64 -y
+        conda create -n ld_score-py3 "$PKGS_LD" --platform=osx-64 -y
     else
-        conda create -n ld_score-py3 python=3.8 -y
+        conda create -n ld_score-py3 "$PKGS_LD" -y
     fi
-    conda activate ld_score-py3
-    pip install "pandas<1.0.0" "numpy<1.20" "bitarray==2.6.0" "scipy" "nose" "pybedtools" "openpyxl" "xlrd==1.2.0"
-    conda deactivate ld_score-py3
+
 fi
+
 
 # 4. Setup the Python 2.7 environment get_h2.py
 if ! conda info --envs | grep -q 'd-ldsc-legacy'; then
     echo " -> Creating Python 2.7 environment for d-LDSC heritability calculation (get_h2.py)..."
     
+    # Required packages for get_h2.py (Python 2.7 compatible versions)
+    PKGS_LEGACY="python=2.7 bitarray scipy numpy pandas pybedtools nose openpyxl xlrd=1.2.0"
+
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
         # Force Intel architecture on Mac
-        CONDA_SUBDIR=osx-64 conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults python=2.7 bitarray scipy numpy pandas pybedtools nose openpyxl xlrd=1.2.0 -y
-        
-       # Lock the environment (Fixed to avoid conda run!)
-        conda activate d-ldsc-legacy
-        conda config --env --set subdir osx-64
-        conda deactivate d-ldsc-legacy
+        CONDA_SUBDIR=osx-64 conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults "$PKGS_LEGACY" -y
+
     else
         # Standard native Linux/Cluster installation
-        conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults python=2.7 bitarray scipy numpy pandas pybedtools nose openpyxl xlrd=1.2.0 -y
+        conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults "$PKGS_LEGACY" -y
     fi
+    
 fi
 
-# Dynamically grab the paths for your environments
-ENV_LDSC=$(conda env list --json | grep "ld_score-py3" | tr -d '", ' | cut -d: -f2)
 
+# Dynamically grab the paths for your environments
+ENV_MAIN=$(conda env list --json | grep "main-py3" | tr -d '", ' | cut -d: -f2)
+ENV_LDSC=$(conda env list --json | grep "ld_score-py3" | tr -d '", ' | cut -d: -f2)
 
 # Set the Python executables based on those paths
 PYTHON_LDSC="${ENV_LDSC}/bin/python"
