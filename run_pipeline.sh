@@ -68,11 +68,11 @@ if ! conda info --envs | grep -q 'd-ldsc-legacy'; then
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
         # Force Intel architecture on Mac
-        CONDA_SUBDIR=osx-64 conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults "$PKGS_LEGACY" -y
+        CONDA_SUBDIR=osx-64 conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults $PKGS_LEGACY -y
 
     else
         # Standard native Linux/Cluster installation
-        conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults "$PKGS_LEGACY" -y
+        conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults $PKGS_LEGACY -y
     fi
     
 fi
