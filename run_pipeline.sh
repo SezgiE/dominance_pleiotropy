@@ -124,7 +124,6 @@ echo "3. Starting dominance heritability calculations..."
 
 conda activate main-py3
 python get_dominance_heritability.py
-conda activate base
 
 echo " -> Heritability calculations complete."
 echo ""
@@ -135,17 +134,8 @@ echo ""
 # ---------------------------------------------------------
 echo "4. Compiling .h2 files into a single CSV..."
 
-# 1. Wipe the slate totally clean
-unset PYTHONPATH
-unset PYTHONHOME
-export PATH=/usr/bin:/bin:/usr/sbin:/sbin
-
-# 2. Hard-code the path to the Python 3 "Brain" 
-# (This is the only way to be 100% sure Snellius doesn't get confused)
-SMART_PYTHON="$HOME/.conda/envs/main-py3/bin/python"
-
-# 3. Run the script directly using that brain
-$SMART_PYTHON compile_h2_results.py
+python compile_h2_results.py
+conda deactivate
 
 echo "========================================================"
 echo " PIPELINE COMPLETE! Your final results are ready. "
