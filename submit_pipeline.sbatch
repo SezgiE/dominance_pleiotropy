@@ -12,6 +12,12 @@
 module load 2025
 module load Miniconda3/25.5.1-1
 
+# 1. Clone the repository if it doesn't exist
+if [ ! -d "d-ldsc" ]; then
+    echo "0. d-ldsc repository not found. Cloning..."
+    git clone https://github.com/astheeggeggs/d-ldsc.git
+fi
+
 # 2. Bring ingredients to the kitchen prep table ($TMPDIR)
 echo "Copying data to scratch..."
 cp -r /home/sercan/dominance/dominance_pleiotropy/* "$TMPDIR"/
