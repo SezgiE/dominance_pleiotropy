@@ -23,8 +23,9 @@ cd "$TMPDIR"
 echo "Running the master pipeline..."
 echo -e "n\nn\n" | ./run_pipeline.sh
 
-# 5. Rescue the finished dishes back to your locker!
+# 5. Get the results
 echo "Saving results..."
-cp -r "$TMPDIR"/ldsc_results /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
-cp -r "$TMPDIR"/sumstats_merged /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
-cp "$TMPDIR"/*.csv /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
+rsync -av "$TMPDIR"/LD_scores/ /home/sercan/dominance/dominance_pleiotropy/LD_scores/
+rsync -av "$TMPDIR"/ldsc_results/ /home/sercan/dominance/dominance_pleiotropy/ldsc_results/
+rsync -av "$TMPDIR"/sumstats_merged/ /home/sercan/dominance/dominance_pleiotropy/sumstats_merged/
+rsync -v "$TMPDIR"/*.csv /home/sercan/dominance/dominance_pleiotropy/

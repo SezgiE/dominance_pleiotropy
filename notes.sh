@@ -1,1 +1,1 @@
-scp -r /Users/sezgi/Documents/dominance_heritability/UKB_sumstats_Neale sercan@snellius.surf.nl:/home/sercan/dominance/dominance_pleiotropy
+scp -r /Users/sezgi/Documents/dominance_heritability/ref_genome sercan@snellius.surf.nl:/home/sercan/dominance/dominance_pleiotropy

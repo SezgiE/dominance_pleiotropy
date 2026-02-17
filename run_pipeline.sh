@@ -15,7 +15,18 @@ echo ""
 # ---------------------------------------------------------
 # STEP 0: Repository & Environment Setup
 # ---------------------------------------------------------
-eval "$(conda shell.bash hook)"
+
+# The Ultimate Cross-Platform Conda Initializer:
+if [ -f "/sw/arch/RHEL9/EB_production/2025/software/Miniconda3/25.5.1-1/etc/profile.d/conda.sh" ]; then
+    # 1. Snellius supercomputer.
+    unset PYTHONPATH
+    unset PYTHONHOME
+    source /sw/arch/RHEL9/EB_production/2025/software/Miniconda3/25.5.1-1/etc/profile.d/conda.sh
+else
+    # 2. A normal Mac/Linux computer. Run normally.
+    eval "$(conda shell.bash hook)"
+fi
+
 
 # 1. Clone the repository if it doesn't exist
 if [ ! -d "d-ldsc" ]; then
@@ -62,8 +73,10 @@ if ! conda info --envs | grep -q 'd-ldsc-legacy'; then
         # Force Intel architecture on Mac
         CONDA_SUBDIR=osx-64 conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults python=2.7 bitarray scipy numpy pandas pybedtools nose openpyxl xlrd=1.2.0 -y
         
-        # Lock the environment to osx-64 so future package updates don't break it
-        conda run -n d-ldsc-legacy conda config --env --set subdir osx-64
+       # Lock the environment (Fixed to avoid conda run!)
+        conda activate d-ldsc-legacy
+        conda config --env --set subdir osx-64
+        conda deactivate
     else
         # Standard native Linux/Cluster installation
         conda create -n d-ldsc-legacy -c conda-forge -c bioconda -c defaults python=2.7 bitarray scipy numpy pandas pybedtools nose openpyxl xlrd=1.2.0 -y
@@ -95,7 +108,9 @@ echo ""
 read -p "2. Do you already have the merged summary statistics? (y/n): " has_sumstats
 if [[ "$has_sumstats" =~ ^[Nn]$ ]]; then
     echo " -> Running get_sumStats.py..."
-    conda run -n main-py3 python get_sumStats.py
+    conda activate main-py3
+    python get_sumStats.py
+    conda deactivate
 else
     echo " -> Skipping summary statistics download and merging."
 fi
@@ -106,8 +121,11 @@ echo ""
 # STEP 3: Heritability Calculation
 # ---------------------------------------------------------
 echo "3. Starting dominance heritability calculations..."
-# The wrapper script runs in Python 3, but triggers the Python 2.7 environment internally
-conda run -n main-py3 python get_dominance_heritability.py
+
+conda activate main-py3
+python get_dominance_heritability.py
+conda deactivate
+
 echo " -> Heritability calculations complete."
 echo ""
 
@@ -116,7 +134,10 @@ echo ""
 # STEP 4: Compile Results
 # ---------------------------------------------------------
 echo "4. Compiling .h2 files into a single CSV..."
-conda run -n main-py3 python compile_h2_results.py
+
+conda activate main-py3
+python compile_h2_results.py
+conda deactivate
 
 echo "========================================================"
 echo " PIPELINE COMPLETE! Your final results are ready. "
