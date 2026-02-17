@@ -135,6 +135,11 @@ echo ""
 # ---------------------------------------------------------
 echo "4. Compiling .h2 files into a single CSV..."
 
+conda deactivate 2>/dev/null
+conda activate base
+unset PYTHONPATH
+unset PYTHONHOME
+
 conda activate main-py3
 python compile_h2_results.py
 conda activate base
