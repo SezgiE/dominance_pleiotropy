@@ -21,7 +21,7 @@ cd "$TMPDIR"
 
 # 4. Cook the meal!
 echo "Running the master pipeline..."
-echo -e "n\nn\n" | ./run_pipeline.sh
+echo -e "y\nn\n" | ./run_pipeline.sh
 
 # 5. Get the results
 echo "Saving results..."

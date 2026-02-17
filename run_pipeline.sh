@@ -95,7 +95,7 @@ if [[ "$has_ld" =~ ^[Nn]$ ]]; then
     echo " -> Running get_d-LD_scores.sh..."
     conda activate ld_score-py3
     bash get_d-LD_scores.sh
-    conda deactivate
+    conda activate base
 else
     echo " -> Skipping LD score calculation."
 fi
@@ -110,7 +110,7 @@ if [[ "$has_sumstats" =~ ^[Nn]$ ]]; then
     echo " -> Running get_sumStats.py..."
     conda activate main-py3
     python get_sumStats.py
-    conda deactivate
+    conda activate base
 else
     echo " -> Skipping summary statistics download and merging."
 fi
@@ -124,7 +124,7 @@ echo "3. Starting dominance heritability calculations..."
 
 conda activate main-py3
 python get_dominance_heritability.py
-conda deactivate
+conda activate base
 
 echo " -> Heritability calculations complete."
 echo ""
@@ -137,7 +137,7 @@ echo "4. Compiling .h2 files into a single CSV..."
 
 conda activate main-py3
 python compile_h2_results.py
-conda deactivate
+conda activate base
 
 echo "========================================================"
 echo " PIPELINE COMPLETE! Your final results are ready. "
