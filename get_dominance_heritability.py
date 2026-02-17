@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import time
@@ -29,9 +30,10 @@ def run_dldsc_pipeline(sumstats_dir, out_dir, ldscore_path, dldsc_script):
 
         out_prefix = os.path.join(out_dir, f"{phenotype}_dom_h2")
 
-        # Get the path to your home directory dynamically
-        home_dir = os.path.expanduser("~")
-        python_exec = os.path.join(home_dir, ".conda/envs/d-ldsc-legacy/bin/python")
+        # Dynamically find the path to the legacy environment (Python 2.7) for get_h2.py
+        raw_data = subprocess.check_output(['conda', 'env', 'list', '--json'])
+        envs = json.loads(raw_data)['envs']
+        python_exec = next(os.path.join(p, "bin/python") for p in envs if "d-ldsc-legacy" in p)
 
         # Construct the command using the direct path to the Python 2.7 executable
         dldsc_cmd = f"""

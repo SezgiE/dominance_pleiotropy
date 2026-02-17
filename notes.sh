@@ -6,3 +6,4 @@ tail -f pipeline_ID.out
 
 squeue -j <JOBID>
 sacct -j <JOBID> --format=JobID,JobName,Elapsed,State
+

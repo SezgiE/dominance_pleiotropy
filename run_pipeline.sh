@@ -11,6 +11,12 @@ echo ""
 # STEP 0: Repository & Environment Setup
 # ---------------------------------------------------------
 
+# 1. Clone the repository if it doesn't exist
+if [ ! -d "d-ldsc" ]; then
+    echo "0. d-ldsc repository not found. Cloning..."
+    git clone https://github.com/astheeggeggs/d-ldsc.git
+fi
+
 # 2. Setup the MAIN environment (Python 3.8 for your data processing)
 if ! conda info --envs | grep -q 'main-py3'; then
     echo " -> Creating MAIN environment (Python 3.8)..."
@@ -60,6 +66,14 @@ if ! conda info --envs | grep -q 'd-ldsc-legacy'; then
     fi
 fi
 
+# Dynamically grab the paths for your environments
+ENV_LDSC=$(conda env list --json | grep "ld_score-py3" | tr -d '", ' | cut -d: -f2)
+ENV_MAIN=$(conda env list --json | grep "main-py3" | tr -d '", ' | cut -d: -f2)
+
+# Set the Python executables based on those paths
+PYTHON_LDSC="${ENV_LDSC}/bin/python"
+PYTHON_MAIN="${ENV_MAIN}/bin/python"
+
 echo " -> Environments successfully verified!"
 echo ""
 
@@ -69,10 +83,10 @@ echo ""
 # ---------------------------------------------------------
 read -p "1. Do you already have the calculated LD and d-LD scores? (y/n): " has_ld
 if [[ "$has_ld" =~ ^[Nn]$ ]]; then
-    echo " -> Running get_d-LD_scores.sh..."
-    conda activate ld_score-py3
-    bash get_d-LD_scores.sh
-    conda activate base
+   
+    echo " -> Running get_d-LD_scores.py..."
+    $PYTHON_LDSC get_ldscores.py
+
 else
     echo " -> Skipping LD score calculation."
 fi
@@ -84,10 +98,10 @@ echo ""
 # ---------------------------------------------------------
 read -p "2. Do you already have the merged summary statistics? (y/n): " has_sumstats
 if [[ "$has_sumstats" =~ ^[Nn]$ ]]; then
+   
     echo " -> Running get_sumStats.py..."
-    conda activate main-py3
-    python get_sumStats.py
-    conda activate base
+    $PYTHON_MAIN get_sumStats.py
+
 else
     echo " -> Skipping summary statistics download and merging."
 fi
@@ -99,8 +113,7 @@ echo ""
 # ---------------------------------------------------------
 echo "3. Starting dominance heritability calculations..."
 
-conda activate main-py3
-python get_dominance_heritability.py
+$PYTHON_MAIN get_dominance_heritability.py
 
 echo " -> Heritability calculations complete."
 echo ""
@@ -111,9 +124,9 @@ echo ""
 # ---------------------------------------------------------
 echo "4. Compiling .h2 files into a single CSV..."
 
-python compile_h2_results.py
-conda deactivate
+$PYTHON_MAIN compile_results.py
 
 echo "========================================================"
 echo " PIPELINE COMPLETE! Your final results are ready. "
 echo "========================================================"
+
