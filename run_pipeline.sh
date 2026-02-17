@@ -7,6 +7,9 @@ echo "  Dominance Heritability Estimator based on d-LDSC by Palmer et al. (2023)
 echo "========================================================"
 echo ""
 
+# Initialize conda 
+source "$(conda info --base)/etc/profile.d/conda.sh"
+
 # ---------------------------------------------------------
 # STEP 0: Repository & Environment Setup
 # ---------------------------------------------------------
@@ -70,7 +73,7 @@ fi
 
 # Dynamically grab the paths for your environments
 ENV_LDSC=$(conda env list --json | grep "ld_score-py3" | tr -d '", ' | cut -d: -f2)
-ENV_MAIN=$(conda env list --json | grep "main-py3" | tr -d '", ' | cut -d: -f2)
+
 
 # Set the Python executables based on those paths
 PYTHON_LDSC="${ENV_LDSC}/bin/python"
