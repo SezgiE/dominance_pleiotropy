@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --job-name=dLDSC_pipeline
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --time=01:00:00
+#SBATCH --mem=16G
+#SBATCH --output=pipeline_%j.out
+#SBATCH --error=pipeline_%j.err
+
+# 1. Unlock the tools and put Conda in a Hazmat suit
+module load 2025
+module load Miniconda3/25.5.1-1
+
+# 2. Bring ingredients to the kitchen prep table ($TMPDIR)
+echo "Copying data to scratch..."
+cp -r /home/sercan/dominance/dominance_pleiotropy/* "$TMPDIR"/
+
+# 3. Move to the prep table
+cd "$TMPDIR"
+
+# 4. Cook the meal!
+echo "Running the master pipeline..."
+echo -e "n\nn\n" | ./run_pipeline.sh
+
+# 5. Rescue the finished dishes back to your locker!
+echo "Saving results..."
+cp -r "$TMPDIR"/ldsc_results /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
+cp -r "$TMPDIR"/sumstats_merged /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
+cp "$TMPDIR"/*.csv /home/sercan/dominance/dominance_pleiotropy/ 2>/dev/null
