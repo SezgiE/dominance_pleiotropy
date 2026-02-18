@@ -30,3 +30,4 @@ __pycache__/
 *.Rhistory
 *.RData
 d-ldsc/
+help_code/

@@ -86,8 +86,6 @@ def preprocess_sumstats(file_add, file_dom, file_ref, file_out):
     print(f"Done! Saved {len(data_out)} SNPs to {file_out}")
 
 
-import sys # Add this to the very top of your file!
-
 def run_single_trait(task_index, add_excel, dom_excel, ref_file, temp_dir, output_dir):
     """Executes the pipeline for ONE specific trait based on the SLURM array index."""
     
@@ -132,6 +130,7 @@ def run_single_trait(task_index, add_excel, dom_excel, ref_file, temp_dir, outpu
         elapsed_time = time.time() - start_time
         print(f"Finished cycle for {code} in {elapsed_time:.2f} seconds\n")
 
+# ==========================================
 # ==========================================
 
 if __name__ == "__main__":

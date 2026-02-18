@@ -31,3 +31,8 @@ with open(output_file, 'wb') as outfile:
             print(f"WARNING: File not found - {bim_path}")
 
 print("\nSuccess! All .bim files have been merged.")
+
+
+    raw_data = subprocess.check_output(['conda', 'env', 'list', '--json'])
+    envs = json.loads(raw_data)['envs']
+    python_exec = next(os.path.join(p, "bin/python") for p in envs if "d-ldsc-legacy" in p)

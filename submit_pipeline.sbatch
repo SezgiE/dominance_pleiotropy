@@ -23,7 +23,7 @@ echo "Copying data to scratch..."
 cp -r /home/sercan/dominance/dominance_pleiotropy/* "$TMPDIR"/
 
 # 3. Move to the prep table
-cd "$TMPDIR"
+cd "$TMPDIR" || exit
 
 # 4. Cook the meal!
 echo "Running the master pipeline..."
