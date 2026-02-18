@@ -79,8 +79,8 @@ fi
 
 
 # Set the Python executables based on those paths
-PYTHON_MAIN="$(conda info --base)/envs/main-py3/bin/python"
-PYTHON_LDSC="$(conda info --base)/envs/ld_score-py3/bin/python"
+PYTHON_MAIN="$HOME/.conda/envs/main-py3/bin/python"
+PYTHON_LDSC="$HOME/.conda/envs/ld_score-py3/bin/python"
 
 
 echo " -> Environments successfully verified!"

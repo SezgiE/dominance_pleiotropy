@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import shutil
 import subprocess
@@ -85,79 +86,72 @@ def preprocess_sumstats(file_add, file_dom, file_ref, file_out):
     print(f"Done! Saved {len(data_out)} SNPs to {file_out}")
 
 
-def run_pipeline(add_excel, dom_excel, ref_file, temp_dir="./temp_sumstats", output_dir="./sumstats_merged"):
+import sys # Add this to the very top of your file!
+
+def run_single_trait(task_index, add_excel, dom_excel, ref_file, temp_dir, output_dir):
+    """Executes the pipeline for ONE specific trait based on the SLURM array index."""
     
-    """Main execution loop for the cluster."""
-    # Ensure directories exist
-    os.makedirs(temp_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
-    
-    print("Initializing pipeline and validating input files...")
     add_dict, dom_dict, phenotype_codes = load_wget_commands(add_excel, dom_excel)
-    print(f"Validation successful. Found {len(phenotype_codes)} matching phenotypes.\n")
     
-    for code in phenotype_codes:
-        start_time = time.time()
-        print(f"--- Starting workflow for phenotype: {code} ---")
+    # Grab ONLY the phenotype assigned to this specific array task
+    try:
+        code = phenotype_codes[task_index]
+    except IndexError:
+        print(f"Task index {task_index} is out of range. Exiting.")
+        return
 
-        # Initialize to None to safely handle cleanup if downloads fail immediately
-        add_filepath = None
-        dom_filepath = None
+    # Create a UNIQUE temporary directory just for this trait so parallel jobs don't clash
+    temp_dir = f"./temp_sumstats_{code}"
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    start_time = time.time()
+    print(f"--- Starting workflow for phenotype: {code} ---")
+    
+    add_filepath, dom_filepath = None, None
+    
+    try:
+        print("Downloading summary statistics...")
+        add_filepath = execute_wget(add_dict[code], temp_dir)
+        dom_filepath = execute_wget(dom_dict[code], temp_dir)
         
-        try:
-            print("Downloading summary statistics...")
-            add_filepath = execute_wget(add_dict[code], temp_dir)
-            dom_filepath = execute_wget(dom_dict[code], temp_dir)
-            
-            # Define output destination
-            out_filename = f"{code}_gwas_merged.chisq.gz"
-            out_filepath = os.path.join(output_dir, out_filename)
-            
-            print("Preprocessing sumstats...")
-            preprocess_sumstats(add_filepath, dom_filepath, ref_file, out_filepath)
+        out_filepath = os.path.join(output_dir, f"{code}_gwas_merged.chisq.gz")
+        
+        print("Preprocessing sumstats...")
+        preprocess_sumstats(add_filepath, dom_filepath, ref_file, out_filepath)
 
-        except Exception as e:
-            # If anything fails (network error, corrupted bgz, missing columns), 
-            # Log it and move to the next trait.
-            print(f"ERROR processing phenotype {code}: {e}")
-            
-        finally:
-            # 5. Delete sumstat files completely
-            print("Cleaning up temporary sumstats...")
-            if add_filepath and os.path.exists(add_filepath):
-                os.remove(add_filepath)
-            if dom_filepath and os.path.exists(dom_filepath):
-                os.remove(dom_filepath)
-            
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            print(f"Finished cycle for {code} in {elapsed_time:.2f} seconds\n")
+    except Exception as e:
+        print(f"ERROR processing phenotype {code}: {e}")
+        
+    finally:
+        # Delete the unique temp directory and everything inside it
+        print("Cleaning up temporary sumstats...")
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+        
+        elapsed_time = time.time() - start_time
+        print(f"Finished cycle for {code} in {elapsed_time:.2f} seconds\n")
 
-    # After the loop finishes entirely, delete the temp directory
-    print("All phenotypes processed. Removing the temporary directory...")
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir)
-        print(f"Successfully deleted {temp_dir}\n")
-
-
-# ==========================================
 # ==========================================
 
 if __name__ == "__main__":
-    import os
+    # Check if a task ID was passed from the terminal
+    if len(sys.argv) < 2:
+        print("Usage: python script.py <task_index>")
+        sys.exit(1)
+        
+    # SLURM arrays usually start at 1, but Python lists start at 0. 
+    # We subtract 1 to align them perfectly.
+    task_index = int(sys.argv[1]) - 1 
+    tmp_dir = sys.argv[2]  # Grab the scratch path from bash
+    out_dir = sys.argv[3]  # Grab the final save path from bash
     
-    # 1. Set working directory where this script is located
+
     base_dir = os.path.abspath(os.path.dirname(__file__))
     os.chdir(base_dir)
 
-    # 2. Define relative paths to input files
-    additive_excel_path = os.path.join(base_dir, "UKB_sumstats_Neale", "a_sumStats.xlsx")
-    dominance_excel_path = os.path.join(base_dir, "UKB_sumstats_Neale", "d_sumStats.xlsx")
-    hapmap3_reference_path = os.path.join(base_dir, "ref_genome", "hm3_no_MHC_MAF_01_INFO_9.txt")
+    additive_excel = os.path.join(base_dir, "UKB_sumstats_Neale", "a_sumStats.xlsx")
+    dominance_excel = os.path.join(base_dir, "UKB_sumstats_Neale", "d_sumStats.xlsx")
+    hapmap3_ref = os.path.join(base_dir, "ref_genome", "hm3_no_MHC_MAF_01_INFO_9.txt")
     
-    run_pipeline(
-        add_excel=additive_excel_path, 
-        dom_excel=dominance_excel_path, 
-        ref_file=hapmap3_reference_path
-    )
-
+    run_single_trait(task_index, additive_excel, dominance_excel, hapmap3_ref, tmp_dir, out_dir)

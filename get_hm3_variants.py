@@ -11,11 +11,12 @@ import os
 import pandas as pd
 
 
-def filter_variants(hapmap3_file, variant_file, output_file):
+def filter_variants(ref_1K_EUR_file, hapmap3_file, variant_file, output_file):
     """Filtering UKBB GWAS variants to HapMap3 SNPs (NO MHC REGION), 
         with MAF > 0.01 and INFO > 0.9, and keeping only diallelic variants.
     
     Args:
+        ref_1K_EUR_file: Path to 1K EUR SNP list file
         hapmap3_file: Path to HapMap3 SNP list file
         gwas_file: Path to GWAS variants file (variants.tsv.gz)
         output_file: Path to save filtered output
@@ -43,10 +44,26 @@ def filter_variants(hapmap3_file, variant_file, output_file):
         (data_merged["ref"].str.len() == 1) & (data_merged["alt"].str.len() == 1)
     ]
 
-    data_merged_rsID = data_merged[["rsid"]]
+    print("4. Loading 1K_EUR SNP list...")
+    ref_1K_EUR = pd.read_csv(ref_1K_EUR_file, sep="\t", usecols=["rsid"])
+    data_merged = pd.merge(data_merged, ref_1K_EUR, on="rsid", how="inner")
 
+    # Rename columns to match the format required for d-LDSC
+    data_merged = data_merged.rename(
+        columns={
+            "variant": "variant",
+            "rsid": "SNP",
+            "ref": "A2",
+            "alt": "A1",
+            "minor_AF": "maf",
+            "info": "info",
+        }
+    )
 
-    print("4. Saving filtered data...")
+    # Keep only rsID column for the second output file for d-LDSC --extract-variants option
+    data_merged_rsID = data_merged[["SNP"]]
+
+    print("5. Saving filtered data...")
     data_merged.to_csv(os.path.join(output_file, "hm3_no_MHC_MAF_01_INFO_9.txt"), 
                        sep="\t", index=False)
     data_merged_rsID.to_csv(os.path.join(output_file, "hm3_no_MHC_MAF_01_INFO_9_rsID.txt"), 
@@ -62,9 +79,11 @@ if __name__ == "__main__":
     os.chdir(base_dir)
     
     # 2. Define relative paths
+    # Note: Ensure that "1000G_merged_all.txt" is created by merging the .bim files from 1000G_EUR_Phase3.
+    ref_1K_EUR_dir = os.path.join(base_dir, "ref_genome/1000G_merged_all.txt")
     hapmap3_path = os.path.join(base_dir, "ref_genome/hm3_no_MHC.list.txt")
     variants_path = os.path.join(base_dir, "ref_genome/variants.tsv.gz")
     output_path = os.path.join(base_dir, "ref_genome")
     
-    filter_variants(hapmap3_path, variants_path, output_path)
+    filter_variants(ref_1K_EUR_dir,hapmap3_path, variants_path, output_path)
 
