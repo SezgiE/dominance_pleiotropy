@@ -67,7 +67,6 @@ def run_dldsc_pipeline(sumstats_dir, out_dir, ldscore_path, dldsc_script):
 
 
 if __name__ == "__main__":
-    import os
     
     # 1. Set working directory where this script is located
     base_dir = os.path.abspath(os.path.dirname(__file__))

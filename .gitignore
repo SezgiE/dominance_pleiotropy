@@ -19,6 +19,8 @@
 *.snplist
 *.txt
 *.log
+*.gz
+*.tsv
 
 # --- Mac System Files ---
 .DS_Store

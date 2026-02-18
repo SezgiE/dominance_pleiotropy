@@ -50,9 +50,9 @@ if ! conda info --envs | grep -q 'ld_score-py3'; then
 
     OS_NAME=$(uname -s)
     if [ "$OS_NAME" = "Darwin" ]; then
-        conda create -n ld_score-py3 $PKGS_LD --platform=osx-64 -y
+        conda create -n ld_score-py3 -c conda-forge -c bioconda -c defaults $PKGS_LD --platform=osx-64 -y
     else
-        conda create -n ld_score-py3 $PKGS_LD -y
+        conda create -n ld_score-py3 -c conda-forge -c bioconda -c defaults $PKGS_LD -y
     fi
 
 fi
@@ -78,13 +78,10 @@ if ! conda info --envs | grep -q 'd-ldsc-legacy'; then
 fi
 
 
-# Dynamically grab the paths for your environments
-ENV_MAIN=$(conda env list --json | grep "main-py3" | tr -d '", ' | cut -d: -f2)
-ENV_LDSC=$(conda env list --json | grep "ld_score-py3" | tr -d '", ' | cut -d: -f2)
-
 # Set the Python executables based on those paths
-PYTHON_LDSC="${ENV_LDSC}/bin/python"
-PYTHON_MAIN="${ENV_MAIN}/bin/python"
+PYTHON_MAIN="$(conda info --base)/envs/main-py3/bin/python"
+PYTHON_LDSC="$(conda info --base)/envs/ld_score-py3/bin/python"
+
 
 echo " -> Environments successfully verified!"
 echo ""
@@ -97,7 +94,7 @@ read -p "1. Do you already have the calculated LD and d-LD scores? (y/n): " has_
 if [[ "$has_ld" =~ ^[Nn]$ ]]; then
    
     echo " -> Running get_d-LD_scores.py..."
-    $PYTHON_LDSC get_ldscores.py
+    $PYTHON_LDSC get_d-LD_scores.py
 
 else
     echo " -> Skipping LD score calculation."
